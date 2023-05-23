@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script> -->
+    <!-- <script src="myAxios.js"></script> -->
+</head>
+<body>
+    <button class="btn1">发送请求</button>
+    <button class="btn2">取消请求</button>
+    <script>
+        const btn = document.querySelectorAll('button');
+
+
+        // 测试取消
+        function Axios(config){
+            this.config = config;
+        }
+        Axios.prototype.request = function(config){
+            return dispatchRequest(config);
+        }
+        function dispatchRequest(config){
+            return XhrAdapter(config);
+        }
+        function XhrAdapter(config){
+            console.log('config', config);
+            return new Promise((r1, r2) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open(config.method, config.url);
+                xhr.send();
+                xhr.onreadystatechange = function(){
+                    console.log('xhr', xhr);// 多次onreadystatechange在变化2,3,4
+                    if(xhr.readyState === 4){
+                        if(xhr.status >= 200 && xhr.status < 300){
+                            console.log('1');
+                            r1({status: xhr.status, data: JSON.parse(xhr.responseText)});
+                        }else{
+                            r2(new Error('error'));
+                        }
+                    }
+                }
+
+                if(config.cancelToken != null){
+                    config.cancelToken.promise.then((data) => {
+                        console.log("canceldata");
+                        xhr.abort();
+                    })
+                }
+            })
+        }
+        const context = new Axios({});
+        const axios = Axios.prototype.request.bind(context);
+        
+        // 取消请求
+        // 甲方 暴露promise状态和改变promise的方法
+        function CancelToken(callbcak){
+            var resolvePromise;
+            this.promise = new Promise((resolve) => {
+                resolvePromise = resolve;
+            })
+            callbcak(function(){
+                resolvePromise();
+            });
+        }
+        let cancelCallback = null;
+        // 绑定
+        btn[0].onclick = function(){
+            // 乙方：获取改变promise的方法
+            let cancelToken = new CancelToken(function(c){
+                cancelCallback = c;
+            });
+          
+            let aa = axios({method: 'get', url: 'http://localhost:3000/posts', cancelToken: cancelToken});
+            console.log('cancelCallbcak', cancelCallback);
+            aa.then(data => {
+                console.log('data', data);
+            })
+        }
+        console.log('cancelCallbcak', cancelCallback);
+        // 取消
+        btn[1].onclick = function(){
+            cancelCallback();
+        }
+    
+        // const instance = axios.create({
+        //     baseURL: 'http://localhost:3000', 
+        //     timeout: 2000
+        // })
+        // instance.interceptors.request.use(function(config){
+        //     console.log('请求拦截1', config);
+        //     // throw '参数出错';
+        //     return config;
+        // }, function(err){
+        //     console.log('失败');
+        //     return Promise.reject(error);
+        // })
+        // instance.interceptors.request.use(function(config){
+        //     console.log('请求拦截2', config);
+        //     // throw '参数出错';
+        //     return config;
+        // }, function(err){
+        //     console.log('失败');
+        //     return Promise.reject(error);
+        // })
+        // instance.interceptors.response.use(function(response){
+        //     console.log('请求响应1', response);
+        //     return response;
+        // }, function(err){
+        //     console.log('失败');
+        //     return err;
+        // })
+        // instance.interceptors.response.use(function(response){
+        //     console.log('请求响应2', response);
+        //     return response;
+        // }, function(err){
+        //     console.log('失败');
+        //     return err;
+        // })
+        // btn[0].onclick = function(){
+        //     try {
+        //         instance({
+        //             url: '/posts'
+        //         }).then(res => {
+        //             console.log('res:', res);
+        //         }).catch(r => {
+        //             console.log('r:', r);
+        //             throw new Error('a');
+        //         })
+        //         // throw new Error('a');
+        //     }catch(err) {
+        //         console.log('err:', err);
+        //     }
+            
+        // }
+        
+
+        // function test() {
+        //     console.log('test');
+        // }
+
+        // test.t = function() {
+        //     console.log('t');
+        // }
+
+        // test();
+        // test.t();
+
+    </script>
+</body>
+</html>

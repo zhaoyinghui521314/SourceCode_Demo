@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./myPromise.js"></script>
+</head>
+<body>
+    <script>
+        // let test1 = new Promise((resolve, reject) => {
+        //     // resolve('test');
+        //     reject('test');
+        //     // throw 'error';
+        // })
+        // // console.log('test', test);
+        // let res1 = test1.then(onResolved => {
+        //     console.log('success', this, onResolved);
+        //     return 1;
+        // }, onRejected => {
+        //     console.log('fail1', onRejected);
+        //     // throw 'a';
+        //     // return new Promise((r1, r2) => {
+        //     //     // r2('test my');
+        //     //     // throw 'a';
+        //     // });
+        // })
+        // console.log('res1', res1);
+        // let res2 = res1.then(onResolved => {
+        //     console.log('success2', this, onResolved);
+        //     return 1;
+        // }, onRejected => {
+        //     console.log('fail2', onRejected);
+        //     // throw 'a';
+        //     return 1;
+        // })
+        // console.log('res2:', res2);
+
+        // let p11 = new Promise((resolve, reject) => {
+        //     resolve('ok1');
+        // })
+        // let p22 = Promise.resolve('s11');
+        // let p33 = Promise.reject('s21');
+
+        // let rres = Promise.all([p11, p22, p33]);
+        // console.log('res', rres);
+        
+        
+
+
+        
+        let P1 = new Promise((r1, r2) => {
+            console.log('t1');
+            setTimeout(() => {
+                r1('P1');
+            }, 5000);
+            console.log('t2');
+        })
+        let P2 = new Promise((r1, r2) => {
+            console.log('t3');
+            setTimeout(() => {
+                r1('P2')
+            }, 4000)
+            console.log('t4');
+        })
+        // 普通函数
+        function fn(){
+            // 与顺序无关，谁先返回就先执行
+            // P1.then((d1) => {
+            //     console.log('d1', d1);
+            // })
+            // P2.then((d2) => {
+            //     console.log('d2', d2);
+            // })
+            // console.log('p1', P1);
+            // console.log('p2', P2);
+        }
+        fn();
+
+        async function asyfn(){
+            // 顺序执行，等到P1结束，立马P2就出来了,不是叠加执行呢
+            let p11 = await P1;
+            // let p22 = await P2;
+            let p33 = await new Promise((r1, r2) => {
+                setTimeout(() => {
+                    r1(p11);
+                }, 4000);
+            })
+            console.log('p11', p11);
+            console.log('p33', p33);
+            // console.log('p22', p22);
+        }
+        asyfn();
+
+        // async内部到await为止算同步，后面的为异步，
+        // 如果后面的操作不依赖前面的await也要继续等待，滥用await可能会造成性能问题，使代码失去并发性
+        // async function fn(){
+        //     console.log('P2');// 同步
+        //     let res = await P;// 同步
+        //     console.log('res', res); // 异步
+        //     console.log('P3'); // 异步
+        // }
+        // console.log('P4');
+        // console.log('fn', fn());
+        // console.log('P5');
+
+
+
+    </script>
+</body>
+</html>
