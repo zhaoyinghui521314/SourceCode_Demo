@@ -1,0 +1,14 @@
+.header {
+    &_son {
+        // 父级拼接：.header_son
+    }
+    &._son {
+        // 父级同级：.header _son
+    }
+    & &_son {
+        // 子级拼接: .header -> .header_son
+    }
+    & &.son {
+        // 子级同级: .header -> .header _son
+    }
+}
